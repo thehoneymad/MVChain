@@ -28,3 +28,8 @@ To publish self-contained apps
 dotnet publish -c Release -r win10-x64
 dotnet publish -c Release -r osx.10.11-x64
 ```
+
+# Recommened Courses and Reads
+* [Coursera](https://www.coursera.org/learn/cryptocurrency/home/welcome) - Highly suggested, the deck is borrowed from the actual Princeton course.
+* [Further curated reading](https://thehoneymad.gitbooks.io/daily-reading-log/content/Blockchain.html)
+* [Session 1 Deck](https://docs.google.com/presentation/d/16NOT-U4dYpNKgCV9qHLNlO0N1TgEaQLZc7lwQBKLc4Q/edit?usp=sharing)
