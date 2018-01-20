@@ -1,12 +1,13 @@
+using MVChain.Lib.Model;
+
 namespace MVChain.Lib.Util
 {
     using System;
-    using MVChain.Lib.Model;
     using Newtonsoft.Json;
 
-    public static class Printer
+    internal static class Printer
     {
-        public static void Print(IPrintableModel model)
+        internal static void Print(ISerializable model)
         {
             if (model == null)
             {
@@ -16,7 +17,7 @@ namespace MVChain.Lib.Util
             Console.WriteLine(JsonConvert.SerializeObject(model, Formatting.Indented));
         }
 
-        public static void Print(string data)
+        internal static void Print(string data)
         {
             if (string.IsNullOrWhiteSpace(data))
             {

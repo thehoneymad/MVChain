@@ -1,6 +1,6 @@
 namespace MVChain.Lib.Model
 {
-    public interface IPrintableModel
+    public interface ISerializable
     { 
     }
 }

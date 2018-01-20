@@ -1,9 +1,11 @@
+using MVChain.Lib.Util;
+using System;
+using System.IO;
+using Newtonsoft.Json;
+
 namespace MVChain.Lib.Model
 {
-    using System.IO;
-    using MVChain.Lib.Util;
-    using Newtonsoft.Json;
-    public class KeyPair: IPrintableModel
+    public class KeyPair : ISerializable
     {
         [JsonProperty(PropertyName = "pub")]
         public byte[] PublicKey { get; set; }
@@ -16,16 +18,29 @@ namespace MVChain.Lib.Model
 
         public bool ShouldSerializePublicKey() => !PublicKey.IsNullOrEmpty();
         public bool ShouldSerializePrivateKey() => !PrivateKey.IsNullOrEmpty();
+
         public bool ShouldSerializeAddress() => !Address.IsNullOrEmpty();
 
-        public static KeyPair From((byte[] privateKey, byte[] publicKey) bytekeypair)
+        internal static KeyPair From((byte[] privateKey, byte[] publicKey) bytekeypair)
         {
             return new KeyPair
             {
                 PrivateKey = bytekeypair.privateKey,
                 PublicKey = bytekeypair.publicKey,
-                Address = CryptoUtils.ToAddress(bytekeypair.publicKey),
+                Address = Util.CryptoUtils.ToAddress(bytekeypair.publicKey),
             };
+        }
+
+        internal static KeyPair LoadFrom(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException(nameof(path));
+            }
+
+            var keyContent = File.ReadAllText(path);
+            var keyPair = JsonConvert.DeserializeObject<KeyPair>(keyContent);
+            return keyPair;
         }
     }
 }

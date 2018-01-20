@@ -1,7 +1,7 @@
-namespace MVChain.Lib.MessagePack
-{
-    using global::MessagePack;
+using MessagePack;
 
+namespace MVChain.Lib.Model
+{
     [MessagePackObject]
     public class SerializableEcPoint
     {

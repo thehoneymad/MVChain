@@ -1,9 +1,11 @@
 ﻿namespace MVChain
 {
     using System;
+    using System.IO;
     using McMaster.Extensions.CommandLineUtils;
     using McMaster.Extensions.CommandLineUtils.Validation;
     using MessagePack.Resolvers;
+    using MVChain.Immutables;
     using MVChain.Lib;
     using MVChain.Lib.Model;
     using MVChain.Lib.Util;
@@ -17,6 +19,7 @@
             var app = new CommandLineApplication();
 
             CompositeResolver.RegisterAndSetAsDefault(
+                ReadonlyBytesResolver.Instance,
                 BuiltinResolver.Instance,
                 DynamicEnumResolver.Instance,
                 DynamicGenericResolver.Instance,
@@ -24,7 +27,7 @@
             );
 
             var cryptoService = new CryptoService();
-            var mineService = new MineService();
+            var mineService = new MineService(cryptoService);
 
             app.Name = "mvchain";
             app.HelpOption(helpOptionString);
@@ -56,21 +59,21 @@
                 command.HelpOption(helpOptionString);
 
                 var keypairopt = command.Option(
-                    "--keypair <FILE>",
+                    "-kp|--keypair <FILE>",
                     "Files that contains keypair json",
                     CommandOptionType.SingleValue)
                     .IsRequired(allowEmptyStrings: false, errorMessage: "keypair file needed");
 
-                keypairopt.ShortName = "-kp";
+                keypairopt.ShortName = "kp";
 
                 var genesisblockopt = command.Option(
-                    "--genesis <FILE>",
+                    "-g|--genesis <FILE>",
                     "The genesis block file that will be created",
                     CommandOptionType.SingleValue)
                     .IsRequired(allowEmptyStrings: false, errorMessage: "Genesis block file name required");
 
-                genesisblockopt.ShortName = "-g";
-                
+                genesisblockopt.ShortName = "g";
+
                 command.OnExecute(() =>
                 {
                     mineService.MineGenesisBlock(keypairopt.Value(), genesisblockopt.Value());
@@ -78,7 +81,17 @@
                 });
             });
 
-            app.Execute(args);
+            try
+            {
+                app.Execute(args);
+            }
+            catch (Exception exception) when ( 
+                exception is CommandParsingException
+                || exception is InvalidDataException)
+            {
+                Printer.Print(exception.Message);
+            }
+
         }
     }
 }
