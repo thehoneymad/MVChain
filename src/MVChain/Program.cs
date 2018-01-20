@@ -2,6 +2,11 @@
 {
     using System;
     using McMaster.Extensions.CommandLineUtils;
+    using MessagePack.Resolvers;
+    using MVChain.Lib;
+    using MVChain.Lib.Model;
+    using MVChain.Lib.Util;
+
     class Program
     {
         private const string helpOption = "-h|--help";
@@ -10,12 +15,21 @@
         {
             var app = new CommandLineApplication();
 
+            CompositeResolver.RegisterAndSetAsDefault(
+                BuiltinResolver.Instance,
+                DynamicEnumResolver.Instance,
+                DynamicGenericResolver.Instance,
+                DynamicObjectResolver.Instance
+            );
+
+            var cryptoService = new CryptoService();
+
             app.Name = "mvchain";
             app.HelpOption(helpOption);
 
             app.OnExecute(() =>
             {
-                Console.WriteLine(appTitle);
+                Printer.Print(appTitle);
                 app.ShowHelp();
                 return 0;
             });
@@ -27,7 +41,8 @@
 
                 command.OnExecute(() =>
                 {
-                    Console.WriteLine("This should generate a key value pair");
+                    var keypair = cryptoService.GenerateKeypair();
+                    Printer.Print(KeyPair.From(keypair));
                     return 0;
                 });
             });
