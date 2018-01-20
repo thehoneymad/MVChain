@@ -6,3 +6,25 @@ MVChain is a small CLI app that teaches you about a minimum viable blockchain co
 
 ### To be done
 3. A small demo of distributed consensus among a set of nodes.
+
+
+## Build 
+
+Install dotnet-core SDK from [here](https://www.microsoft.com/net/download/macos)
+```
+git clone https://github.com/thehoneymad/MVChain.git
+cd MVChain/src
+dotnet build
+```
+To publish
+
+```
+dotnet publish
+```
+
+To publish self-contained apps
+
+```
+dotnet publish -c Release -r win10-x64
+dotnet publish -c Release -r osx.10.11-x64
+```
