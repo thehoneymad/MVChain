@@ -1,7 +1,10 @@
 ﻿namespace MVChain
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Net;
+
     using McMaster.Extensions.CommandLineUtils;
     using McMaster.Extensions.CommandLineUtils.Validation;
     using MessagePack.Resolvers;
@@ -9,6 +12,7 @@
     using MVChain.Lib;
     using MVChain.Lib.Model;
     using MVChain.Lib.Util;
+    using Newtonsoft.Json;
 
     class Program
     {
@@ -25,6 +29,15 @@
                 DynamicGenericResolver.Instance,
                 DynamicObjectResolver.Instance
             );
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter>
+                {
+                    new IPEndPointConverter()
+                }
+            };
+
 
             var cryptoService = new CryptoService();
             var mineService = new MineService(cryptoService);
@@ -81,11 +94,43 @@
                 });
             });
 
+            app.Command("config", (command) =>
+            {
+                command.Description = "Generate the config file";
+                command.HelpOption(helpOptionString);
+
+                var genFileOpt = command.Option(
+                    "-gf|--generate",
+                    "generate a file with the default config",
+                    CommandOptionType.NoValue);
+
+
+                command.OnExecute(() =>
+                {
+                    var defaultConfigJson = JsonConvert.SerializeObject(
+                        DefaultConfigGenerator.DefaultConfig,
+                        Formatting.Indented);
+
+                    Printer.Print(defaultConfigJson);
+
+                    if (genFileOpt.HasValue())
+                    {
+                        using (StreamWriter configFile = new StreamWriter(
+                            DefaultConfigGenerator.DefaultConfigFilePath, append: false))
+                        {
+                            configFile.WriteLine(defaultConfigJson);
+                        }
+
+                        Printer.Print("Config file written at: " + DefaultConfigGenerator.DefaultConfigFilePath);
+                    }
+                });
+            });
+
             try
             {
                 app.Execute(args);
             }
-            catch (Exception exception) when ( 
+            catch (Exception exception) when (
                 exception is CommandParsingException
                 || exception is InvalidDataException)
             {
