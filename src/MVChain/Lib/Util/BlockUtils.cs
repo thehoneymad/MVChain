@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MVChain.Immutables;
 using MVChain.Lib.Model;
 
 namespace MVChain.Lib.Util
@@ -31,6 +32,14 @@ namespace MVChain.Lib.Util
             block.Transactions = null;
             var bytes = MessagePack.MessagePackSerializer.Serialize(block);
             return CryptoUtils.ComputeDoubleSHA256(bytes);
+        }
+
+        public static Block DeserializeBlock(byte[] data)
+        {
+            var block =  MessagePack.MessagePackSerializer.Deserialize<Block>(data);
+            block.Original = data;
+            block.Id = ReadonlyBytes.CopyFrom(ComputeBlockId(data));
+            return block;
         }
     }
 }

@@ -2,7 +2,7 @@ using System.Net;
 
 namespace MVChain.Lib.Model
 {
-    internal class Config
+    internal class Config: ISerializable
     {
         public IPEndPoint ListenOn { get; set; }
         public IPEndPoint[] InitialEndpoints { get; set; }

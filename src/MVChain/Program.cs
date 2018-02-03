@@ -38,9 +38,9 @@
                 }
             };
 
-
             var cryptoService = new CryptoService();
             var mineService = new MineService(cryptoService);
+            var nodeService = new NodeService(cryptoService, mineService);
 
             app.Name = "mvchain";
             app.HelpOption(helpOptionString);
@@ -51,7 +51,6 @@
                 app.ShowHelp();
                 return 0;
             });
-
 
             app.Command("keygen", (command) =>
             {
@@ -96,7 +95,7 @@
 
             app.Command("config", (command) =>
             {
-                command.Description = "Generate the config file";
+                command.Description = "Generate the default config file";
                 command.HelpOption(helpOptionString);
 
                 var genFileOpt = command.Option(
@@ -104,25 +103,38 @@
                     "generate a file with the default config",
                     CommandOptionType.NoValue);
 
+                command.OnExecute(() =>
+                {
+                    DefaultConfigGenerator.GenerateDefaultConfig(genFileOpt.HasValue());
+                    return 0;
+                });
+            });
+
+            app.Command("run", (command) =>
+            {
+                command.Description = "Run the blockchain node";
+                command.HelpOption(helpOptionString);
+
+                var configOpt = command.Option(
+                    "-c|--config <FILE>",
+                    "Path to the node configuration file, default value can be generated using config -g command",
+                    CommandOptionType.SingleValue)
+                    .IsRequired(allowEmptyStrings: false, errorMessage: "Config file path required");
 
                 command.OnExecute(() =>
                 {
-                    var defaultConfigJson = JsonConvert.SerializeObject(
-                        DefaultConfigGenerator.DefaultConfig,
-                        Formatting.Indented);
+                    nodeService.BootUp(configOpt.Value());
 
-                    Printer.Print(defaultConfigJson);
-
-                    if (genFileOpt.HasValue())
+                    var newBlock = new Block()
                     {
-                        using (StreamWriter configFile = new StreamWriter(
-                            DefaultConfigGenerator.DefaultConfigFilePath, append: false))
-                        {
-                            configFile.WriteLine(defaultConfigJson);
-                        }
+                        PreviousHash = MineService.EmptyHash,
+                        Difficulty = MineService.Difficulty,
+                        Nonce = 0,
+                        Timestamp = DateTime.UtcNow,
+                    };
 
-                        Printer.Print("Config file written at: " + DefaultConfigGenerator.DefaultConfigFilePath);
-                    }
+                    nodeService.AddBlock(newBlock);
+
                 });
             });
 

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace MVChain.Lib.Model
 {
     [MessagePackObject]
-    public class Block
+    public class Block : ISerializable
     {
         [IgnoreMember, JsonIgnore]
         public byte[] Original { get; set; }

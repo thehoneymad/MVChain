@@ -48,9 +48,7 @@ namespace MVChain.Lib
 
             Mine(genesisBlock);
 
-            var json = JsonConvert.SerializeObject(genesisBlock, Formatting.Indented);
-
-            Printer.Print(json);
+            Printer.Print(genesisBlock);
 
             using (var fs = File.OpenWrite(genesisblockpath))
             {
